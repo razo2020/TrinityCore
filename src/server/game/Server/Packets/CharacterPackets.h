@@ -23,6 +23,7 @@
 #include "Optional.h"
 #include "PacketUtilities.h"
 #include "Position.h"
+#include "RaceMask.h"
 #include "SharedDefines.h"
 #include "UnitDefines.h"
 #include <array>
@@ -166,6 +167,8 @@ namespace WorldPackets
                 };
 
                 std::array<VisualItemInfo, 23> VisualItems = { };
+                std::vector<std::string> Unknown830; // Something with character names, same length limit as name,
+                                                     // client accepts unlimited number of these in packet but only uses first 3
             };
 
             struct RaceUnlock

@@ -20,6 +20,7 @@
 
 #include "Define.h"
 #include "DBCEnums.h"
+#include "RaceMask.h"
 #include "Util.h"
 
 #pragma pack(push, 1)
@@ -594,6 +595,7 @@ struct ChrRacesEntry
     int32 FemaleSkeletonFileDataID;
     int32 MaleSkeletonFileDataID;
     int32 HelmVisFallbackRaceID;
+    int32 TransmogrifyDisabledSlotMask;
     int16 FactionID;
     int16 CinematicSequenceID;
     int16 ResSicknessSpellID;
@@ -670,6 +672,7 @@ struct ContentTuningXExpectedEntry
 {
     uint32 ID;
     int32 ExpectedStatModID;
+    int32 MythicPlusSeasonID;
     uint32 ContentTuningID;
 };
 
@@ -684,6 +687,15 @@ struct ConversationLineEntry
     uint8 SpeechType;
     uint8 StartAnimation;
     uint8 EndAnimation;
+};
+
+struct CorruptionEffectsEntry
+{
+    uint32 ID;
+    float MinCorruption;
+    int32 Aura;
+    int32 PlayerConditionID;
+    int32 Flags;
 };
 
 struct CreatureDisplayInfoEntry
@@ -948,7 +960,7 @@ struct CriteriaTreeEntry
     int8 Operator;
     uint32 CriteriaID;
     int32 OrderIndex;
-    int16 Flags;
+    int32 Flags;
 };
 
 struct CurrencyTypesEntry
@@ -966,6 +978,8 @@ struct CurrencyTypesEntry
     int8 Quality;
     int32 FactionID;
     int32 ItemGroupSoundsID;
+    int32 ConvertToPlayerExperience;
+    int32 PlayerConditionID;
 };
 
 struct CurveEntry
@@ -1059,7 +1073,7 @@ struct DurabilityQualityEntry
 struct EmotesEntry
 {
     uint32 ID;
-    int64 RaceMask;
+    Trinity::RaceMask<int64> RaceMask;
     char const* EmoteSlashCommand;
     int32 AnimID;
     uint32 EmoteFlags;
@@ -1119,7 +1133,7 @@ struct ExpectedStatModEntry
 
 struct FactionEntry
 {
-    int64 ReputationRaceMask[4];
+    Trinity::RaceMask<int64> ReputationRaceMask[4];
     LocalizedString* Name;
     LocalizedString* Description;
     uint32 ID;
@@ -1522,7 +1536,6 @@ struct ItemAppearanceEntry
 {
     uint32 ID;
     uint8 DisplayType;
-    int32 SubclassID;
     int32 ItemDisplayInfoID;
     int32 DefaultIconFileDataID;
     int32 UiOrder;
@@ -1751,6 +1764,13 @@ struct ItemModifiedAppearanceEntry
     int8 TransmogSourceTypeEnum;
 };
 
+struct ItemNameDescriptionEntry
+{
+    uint32 ID;
+    LocalizedString* Description;
+    int32 Color;
+};
+
 struct ItemPriceBaseEntry
 {
     uint32 ID;
@@ -1761,7 +1781,7 @@ struct ItemPriceBaseEntry
 
 struct ItemSearchNameEntry
 {
-    int64 AllowableRace;
+    Trinity::RaceMask<int64> AllowableRace;
     LocalizedString* Display;
     uint32 ID;
     uint8 OverallQualityID;
@@ -1801,7 +1821,7 @@ struct ItemSetSpellEntry
 struct ItemSparseEntry
 {
     uint32 ID;
-    int64 AllowableRace;
+    Trinity::RaceMask<int64> AllowableRace;
     LocalizedString* Description;
     LocalizedString* Display3;
     LocalizedString* Display2;
@@ -2100,6 +2120,8 @@ struct MountEntry
     uint32 PlayerConditionID;
     float MountFlyRideHeight;
     int32 UiModelSceneID;
+    int32 MountSpecialRiderAnimKitID;
+    int32 MountSpecialSpellVisualKitID;
 
     bool IsSelfMount() const { return (Flags & MOUNT_FLAG_SELF_MOUNT) != 0; }
 };
@@ -2203,7 +2225,7 @@ struct PhaseXPhaseGroupEntry
 
 struct PlayerConditionEntry
 {
-    int64 RaceMask;
+    Trinity::RaceMask<int64> RaceMask;
     LocalizedString* FailureDescription;
     uint32 ID;
     uint16 MinLevel;
@@ -2535,7 +2557,7 @@ struct SkillLineEntry
 
 struct SkillLineAbilityEntry
 {
-    int64 RaceMask;
+    Trinity::RaceMask<int64> RaceMask;
     uint32 ID;
     int16 SkillLine;
     int32 Spell;
@@ -2555,7 +2577,7 @@ struct SkillLineAbilityEntry
 struct SkillRaceClassInfoEntry
 {
     uint32 ID;
-    int64 RaceMask;
+    Trinity::RaceMask<int64> RaceMask;
     int16 SkillID;
     int32 ClassMask;
     uint16 Flags;
@@ -2973,11 +2995,11 @@ struct SpellTotemsEntry
 struct SpellVisualKitEntry
 {
     uint32 ID;
-    int32 Flags;
     int8 FallbackPriority;
-    uint32 FallbackSpellVisualKitId;
+    int32 FallbackSpellVisualKitId;
     uint16 DelayMin;
     uint16 DelayMax;
+    int32 Flags[2];
 };
 
 struct SpellXSpellVisualEntry
@@ -3155,6 +3177,7 @@ struct UiMapEntry
     int32 VisibilityPlayerConditionID;
     int8 HelpTextPosition;
     int32 BkgAtlasID;
+    int32 AlternateUiMapGroup;
 };
 
 struct UiMapAssignmentEntry

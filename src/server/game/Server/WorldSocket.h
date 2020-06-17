@@ -19,10 +19,10 @@
 #define __WORLDSOCKET_H__
 
 #include "Common.h"
+#include "AsyncCallbackProcessor.h"
 #include "BigNumber.h"
 #include "DatabaseEnvFwd.h"
 #include "MessageBuffer.h"
-#include "QueryCallbackProcessor.h"
 #include "Socket.h"
 #include "WorldPacketCrypt.h"
 #include "MPSCQueue.h"
@@ -56,7 +56,7 @@ struct PacketHeader
     uint32 Size;
     uint8 Tag[12];
 
-    bool IsValidSize() { return Size < 0x10000; }
+    bool IsValidSize() { return Size < 0x40000; }
 };
 
 #pragma pack(pop)

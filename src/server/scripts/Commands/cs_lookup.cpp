@@ -36,6 +36,7 @@ EndScriptData */
 #include "SpellMgr.h"
 #include "World.h"
 #include "WorldSession.h"
+#include <sstream>
 
 class lookup_commandscript : public CommandScript
 {
@@ -411,7 +412,7 @@ public:
         uint32 count = 0;
         uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
 
-        // Search in `item_template`
+        // Search in ItemSparse
         ItemTemplateContainer const* its = sObjectMgr->GetItemTemplateStore();
         for (ItemTemplateContainer::const_iterator itr = its->begin(); itr != its->end(); ++itr)
         {
@@ -838,11 +839,10 @@ public:
         uint32 count = 0;
         uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
 
-        // Search in Spell.dbc
-        for (uint32 id = 0; id < sSpellMgr->GetSpellInfoStoreSize(); id++)
+        // Search in SpellName.dbc
+        for (SpellNameEntry const* spellName : sSpellNameStore)
         {
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(id);
-            if (spellInfo)
+            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellName->ID, DIFFICULTY_NONE))
             {
                 int locale = handler->GetSessionDbcLocale();
                 std::string name = spellInfo->SpellName->Str[locale];
@@ -874,16 +874,16 @@ public:
                         return true;
                     }
 
-                    bool known = target && target->HasSpell(id);
+                    bool known = target && target->HasSpell(spellInfo->Id);
 
                     SpellEffectInfo const* effect = spellInfo->GetEffect(EFFECT_0);
                     bool learn = effect ? (effect->Effect == SPELL_EFFECT_LEARN_SPELL) : false;
 
-                    SpellInfo const* learnSpellInfo = effect ? sSpellMgr->GetSpellInfo(effect->TriggerSpell) : NULL;
+                    SpellInfo const* learnSpellInfo = effect ? sSpellMgr->GetSpellInfo(effect->TriggerSpell, spellInfo->Difficulty) : NULL;
 
                     bool talent = spellInfo->HasAttribute(SPELL_ATTR0_CU_IS_TALENT);
                     bool passive = spellInfo->IsPassive();
-                    bool active = target && target->HasAura(id);
+                    bool active = target && target->HasAura(spellInfo->Id);
 
                     // unit32 used to prevent interpreting uint8 as char at output
                     // find rank of learned spell for learning spell, or talent rank
@@ -892,9 +892,9 @@ public:
                     // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                     std::ostringstream ss;
                     if (handler->GetSession())
-                        ss << id << " - |cffffffff|Hspell:" << id << "|h[" << name;
+                        ss << spellInfo->Id << " - |cffffffff|Hspell:" << spellInfo->Id << "|h[" << name;
                     else
-                        ss << id << " - " << name;
+                        ss << spellInfo->Id << " - " << name;
 
                     // include rank in link name
                     if (rank)
@@ -937,7 +937,7 @@ public:
 
         uint32 id = atoi((char*)args);
 
-        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(id))
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(id, DIFFICULTY_NONE))
         {
             int locale = handler->GetSessionDbcLocale();
             std::string name = spellInfo->SpellName->Str[locale];
@@ -952,7 +952,7 @@ public:
             SpellEffectInfo const* effect = spellInfo->GetEffect(EFFECT_0);
             bool learn = effect? (effect->Effect == SPELL_EFFECT_LEARN_SPELL) : false;
 
-            SpellInfo const* learnSpellInfo = effect ? sSpellMgr->GetSpellInfo(effect->TriggerSpell) : NULL;
+            SpellInfo const* learnSpellInfo = effect ? sSpellMgr->GetSpellInfo(effect->TriggerSpell, DIFFICULTY_NONE) : NULL;
 
             bool talent = spellInfo->HasAttribute(SPELL_ATTR0_CU_IS_TALENT);
             bool passive = spellInfo->IsPassive();
